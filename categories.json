@@ -1,0 +1,11 @@
+[
+  { "id": "adjectives",  "label": "Adjectives",  "icon": "📝", "file": "adjectives.json"  },
+  { "id": "adverbs",     "label": "Adverbs",     "icon": "⚡", "file": "adverbs.json"     },
+  { "id": "prepositions",     "label": "Prepositions",     "icon": "🛡️", "file": "prepositions.json"  },
+  { "id": "Family",     "label": "Family",     "icon": "⚔️", "file": "family.json"  },
+  { "id": "Family Nouns",     "label": "Family Nouns",     "icon": "🚨", "file": "family_nouns.json"  },
+  { "id": "Verbs",     "label": "Verbs",     "icon": "🧠", "file": "verbs.json"  },
+  { "id": "Travel Nouns",     "label": "Travel Nouns",     "icon": "🏁", "file": "travel_verbs.json"  },
+  { "id": "Travel Verbs",     "label": "Travel Verbs",     "icon": "⏰", "file": "travel.json"  },
+  { "id": "House Verbs",     "label": "House Verbs",     "icon": "🏆", "file": "house_verbs.json"  }
+]

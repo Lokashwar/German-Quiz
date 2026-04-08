@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>German Quiz</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f0f13;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container { width: 100%; max-width: 660px; }
+
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #a78bfa;
+      margin-bottom: 28px;
+      text-transform: uppercase;
+    }
+
+    /* ── Loading ── */
+    #loadingMsg {
+      text-align: center;
+      color: #555;
+      font-size: 0.9rem;
+      padding: 40px 0;
+    }
+
+    /* ── Mode selector ── */
+    .mode-screen { display: block; }
+    .mode-screen.hidden { display: none; }
+
+    .mode-title {
+      text-align: center;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #444;
+      margin-bottom: 14px;
+    }
+
+    .mode-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .mode-card {
+      background: #16161f;
+      border: 1px solid #2a2a3a;
+      border-radius: 14px;
+      padding: 26px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      color: #ccc;
+    }
+
+    .mode-card:hover {
+      border-color: #7c3aed;
+      background: #1e1e2e;
+      color: #e0d0ff;
+      transform: translateY(-2px);
+    }
+
+    .mode-card.all-card {
+      border-color: #3b2f6e;
+      color: #a78bfa;
+    }
+    .mode-card.all-card:hover { border-color: #7c3aed; }
+
+    .mode-icon   { font-size: 1.8rem; margin-bottom: 10px; }
+    .mode-label  { font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; letter-spacing: 0.03em; }
+    .mode-count  { font-size: 0.7rem; color: #555; }
+
+    /* ── Quiz area ── */
+    .quiz-area { display: block; }
+    .quiz-area.hidden { display: none; }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .back-btn {
+      background: none;
+      border: 1px solid #2a2a3a;
+      color: #666;
+      font-size: 0.78rem;
+      padding: 5px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .back-btn:hover { border-color: #7c3aed; color: #a78bfa; }
+
+    .stats { display: flex; gap: 16px; font-size: 0.8rem; color: #888; }
+    .stats span { color: #c4b5fd; font-weight: 600; }
+
+    .progress-bar {
+      width: 100%; height: 4px;
+      background: #1e1e2e; border-radius: 2px;
+      margin-bottom: 24px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #7c3aed, #a78bfa);
+      transition: width 0.4s ease; border-radius: 2px;
+    }
+
+    .card {
+      background: #16161f;
+      border: 1px solid #2a2a3a;
+      border-radius: 16px;
+      padding: 32px 28px;
+    }
+
+    .category-badge {
+      display: inline-block;
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      background: #1e1e2e; color: #7c3aed;
+      border: 1px solid #3b2f6e;
+      padding: 4px 10px; border-radius: 6px; margin-bottom: 20px;
+    }
+
+    .question {
+      font-size: 2rem; font-weight: 700;
+      color: #f1f1f1; margin-bottom: 8px; line-height: 1.2;
+    }
+
+    .hint { font-size: 0.78rem; color: #555; margin-bottom: 28px; }
+
+    .options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .option {
+      background: #1e1e2e; border: 1px solid #2a2a3a;
+      border-radius: 10px; padding: 14px 16px;
+      font-size: 1.05rem; color: #ccc;
+      cursor: pointer; transition: all 0.15s ease;
+      text-align: left; font-family: inherit;
+    }
+    .option:hover:not(:disabled) { border-color: #7c3aed; color: #e0d0ff; background: #22203a; }
+    .option.correct { background: #0f2d1a; border-color: #22c55e; color: #4ade80; }
+    .option.wrong   { background: #2d0f0f; border-color: #ef4444; color: #f87171; }
+    .option.reveal  { border-color: #22c55e; color: #4ade80; background: #0f2d1a; }
+    .option:disabled { cursor: default; }
+
+    .feedback {
+      margin-top: 22px; text-align: center; font-size: 0.9rem;
+      min-height: 40px; display: flex; align-items: center; justify-content: center; color: #888;
+    }
+    .feedback.correct-msg { color: #4ade80; }
+    .feedback.wrong-msg   { color: #f87171; }
+
+    .next-btn {
+      display: none; margin: 20px auto 0;
+      background: #7c3aed; color: white; border: none;
+      padding: 12px 32px; border-radius: 10px;
+      font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+      transition: background 0.15s; letter-spacing: 0.04em;
+    }
+    .next-btn:hover { background: #6d28d9; }
+
+    .streak { font-size: 0.78rem; color: #f59e0b; min-height: 18px; text-align: center; margin-top: 12px; }
+
+    /* ── Score screen ── */
+    .score-screen { text-align: center; display: none; }
+    .score-screen.active { display: block; }
+    .score-big { font-size: 4rem; font-weight: 800; color: #a78bfa; margin: 16px 0 8px; }
+    .score-label { color: #888; font-size: 0.95rem; margin-bottom: 6px; }
+    .score-mode-label { font-size: 0.72rem; color: #444; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .score-grade { font-size: 1.1rem; font-weight: 600; margin-bottom: 28px; }
+
+    .score-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .score-actions button {
+      border: none; padding: 13px 28px; border-radius: 10px;
+      font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: background 0.15s;
+    }
+    .btn-retry { background: #7c3aed; color: white; }
+    .btn-retry:hover { background: #6d28d9; }
+    .btn-home  { background: #1e1e2e; color: #a78bfa; border: 1px solid #3b2f6e !important; }
+    .btn-home:hover { background: #22203a; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>🇩🇪 German Quiz</h1>
+
+  <!-- ── Mode selector ── -->
+  <div class="mode-screen" id="modeScreen">
+    <p class="mode-title">Choose a category to practice</p>
+    <div id="loadingMsg">Loading categories…</div>
+    <div class="mode-cards" id="modeCards" style="display:none;"></div>
+  </div>
+
+  <!-- ── Quiz area ── -->
+  <div class="quiz-area hidden" id="quizArea">
+    <div class="top-bar">
+      <button class="back-btn" onclick="goHome()">← Menu</button>
+      <div class="stats">
+        <div>Q <span id="qNum">1</span> / <span id="qTotal">0</span></div>
+        <div>Score: <span id="score">0</span></div>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="card">
+      <div class="category-badge" id="categoryBadge">—</div>
+      <div class="question" id="question">—</div>
+      <div class="hint">Choose the correct German word</div>
+      <div class="options" id="options"></div>
+      <div class="feedback" id="feedback"></div>
+      <div style="display:flex;justify-content:center;">
+        <button class="next-btn" id="nextBtn">Next →</button>
+      </div>
+      <div class="streak" id="streak"></div>
+    </div>
+  </div>
+
+  <!-- ── Score screen ── -->
+  <div class="score-screen card" id="scoreScreen">
+    <div style="font-size:1rem;color:#888;margin-bottom:4px;">Quiz Complete</div>
+    <div class="score-big" id="finalScore">—</div>
+    <div class="score-label" id="scoreLabel">—</div>
+    <div class="score-mode-label" id="scoreModeLabel">—</div>
+    <div class="score-grade" id="scoreGrade">—</div>
+    <div class="score-actions">
+      <button class="btn-retry" id="retryBtn">Try Again</button>
+      <button class="btn-home btn-home" onclick="goHome()">← Menu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Similarity groups for hard distractors ──
+  const SIMILARITY_GROUPS = [
+    ["schon", "noch", "schön"],
+    ["gut", "gesund", "toll", "wunderbar", "besser", "best"],
+    ["schlecht", "böse", "arm"],
+    ["billig", "günstig", "teuer"],
+    ["schnell", "sofort", "bald"],
+    ["langsam", "selten", "manchmal"],
+    ["klein", "kurz", "wenig"],
+    ["groß", "lang", "mehr"],
+    ["heiß", "bitter", "süß", "kalt"],
+    ["glücklich", "zufrieden", "traurig"],
+    ["schön", "hässlich", "sauber", "wunderbar"],
+    ["krank", "müde", "schwer"],
+    ["einfach", "leicht", "schwierig", "schwer", "kompliziert"],
+    ["bekannt", "fremd", "freundlich"],
+    ["hell", "dunkel", "ruhig"],
+    ["dringend", "eilig", "sofort"],
+    ["immer", "meistens", "oft", "manchmal", "selten", "nie"],
+    ["jetzt", "gerade", "sofort", "bereits", "schon"],
+    ["gestern", "heute", "morgen", "vorgestern", "übermorgen"],
+    ["viel", "viele", "alle", "einige", "manche", "beide", "ganz"],
+    ["gern", "gerne", "leider", "natürlich", "wirklich", "bestimmt", "vielleicht"],
+    ["da", "dort", "hier", "drinnen", "draußen"],
+    ["links", "rechts", "geradeaus", "zurück", "weg"],
+    ["und", "oder", "aber", "deshalb", "außerdem", "auch"],
+    ["noch ein", "noch zwei", "noch", "ein bisschen", "mindestens"],
+    ["alle", "alles", "beide", "manche", "einige"],
+    ["viel", "viele", "sehr", "besonders"],
+    ["reich", "arm", "billig", "teuer"],
+    ["nett", "freundlich", "böse"],
+    ["jung", "alt", "neu"],
+    ["jede", "nächste", "letzte"],
+    ["zurück", "weiter", "weg", "weit"],
+    ["zusammen", "allein"],
+    ["wichtig", "dringend", "eilig"],
+    ["schon", "bereits"],
+    ["da", "dort"],
+    ["gern", "gerne"],
+  ];
+
+  // ── State ──
+  let allCategories = [];   // [{ id, label, icon, file, words: [...] }]
+  let activeIds = [];       // category ids selected for current quiz
+  let questions = [];
+  let current = 0;
+  let score = 0;
+  let streak = 0;
+  let answered = false;
+
+  // ── Boot: load categories.json then each word file ──
+  async function boot() {
+    try {
+      const catRes = await fetch('categories.json');
+      const cats   = await catRes.json();
+
+      await Promise.all(cats.map(async cat => {
+        const res   = await fetch(cat.file);
+        const words = await res.json();
+        allCategories.push({
+          ...cat,
+          words: words.map(w => ({ ...w, category: cat.label }))
+        });
+      }));
+
+      // Keep stable order matching categories.json
+      allCategories.sort((a, b) => cats.findIndex(c => c.id === a.id) - cats.findIndex(c => c.id === b.id));
+
+      buildMenu();
+    } catch (e) {
+      document.getElementById('loadingMsg').textContent =
+        '⚠ Could not load word files. Make sure you open this via Live Server.';
+      console.error(e);
+    }
+  }
+
+  function buildMenu() {
+    const loading = document.getElementById('loadingMsg');
+    const cards   = document.getElementById('modeCards');
+    loading.style.display = 'none';
+    cards.style.display   = 'grid';
+    cards.innerHTML = '';
+
+    // One card per category
+    allCategories.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'mode-card';
+      btn.innerHTML = `
+        <div class="mode-icon">${cat.icon}</div>
+        <div class="mode-label">${cat.label}</div>
+        <div class="mode-count">${cat.words.length} words</div>`;
+      btn.onclick = () => startQuiz([cat.id]);
+      cards.appendChild(btn);
+    });
+
+    // "All" card — only show if more than one category
+    if (allCategories.length > 1) {
+      const totalWords = allCategories.reduce((n, c) => n + c.words.length, 0);
+      const allBtn = document.createElement('button');
+      allBtn.className = 'mode-card all-card';
+      allBtn.innerHTML = `
+        <div class="mode-icon">🌐</div>
+        <div class="mode-label">All</div>
+        <div class="mode-count">${totalWords} words</div>`;
+      allBtn.onclick = () => startQuiz(allCategories.map(c => c.id));
+      cards.appendChild(allBtn);
+    }
+  }
+
+  // ── Quiz logic ──
+  function getPool(ids) {
+    return allCategories
+      .filter(c => ids.includes(c.id))
+      .flatMap(c => c.words);
+  }
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function getSimilarWords(word, pool, count) {
+    const german = word.german;
+    let candidates = [];
+
+    for (const group of SIMILARITY_GROUPS) {
+      if (group.includes(german)) {
+        for (const g of group) {
+          if (g !== german) {
+            const match = pool.find(w => w.german === g);
+            if (match) candidates.push(match);
+          }
+        }
+      }
+    }
+
+    // Fallback: same category words
+    const sameCat = shuffle(pool.filter(w => w.category === word.category && w.german !== german));
+    candidates = [...candidates, ...sameCat];
+
+    // Deduplicate
+    const seen = new Set();
+    const unique = [];
+    for (const w of candidates) {
+      if (!seen.has(w.german)) { seen.add(w.german); unique.push(w); }
+    }
+    return unique.slice(0, count);
+  }
+
+  function buildQuestion(word, pool) {
+    const distractors = getSimilarWords(word, pool, 3);
+    if (distractors.length < 3) {
+      const extra = shuffle(pool.filter(w => w.german !== word.german && !distractors.find(d => d.german === w.german)));
+      while (distractors.length < 3 && extra.length) distractors.push(extra.shift());
+    }
+    return { word, options: shuffle([word, ...distractors.slice(0, 3)]) };
+  }
+
+  function startQuiz(ids) {
+    activeIds = ids;
+    const pool = getPool(ids);
+    questions  = shuffle(pool).map(word => buildQuestion(word, pool));
+    current = 0; score = 0; streak = 0; answered = false;
+
+    document.getElementById('qTotal').textContent = questions.length;
+    document.getElementById('modeScreen').classList.add('hidden');
+    document.getElementById('scoreScreen').classList.remove('active');
+    document.getElementById('quizArea').classList.remove('hidden');
+    document.getElementById('retryBtn').onclick = () => startQuiz(activeIds);
+
+    renderQuestion();
+  }
+
+  function goHome() {
+    document.getElementById('quizArea').classList.add('hidden');
+    document.getElementById('scoreScreen').classList.remove('active');
+    document.getElementById('modeScreen').classList.remove('hidden');
+  }
+
+  function renderQuestion() {
+    answered = false;
+    const { word, options } = questions[current];
+    const total = questions.length;
+
+    document.getElementById('qNum').textContent     = current + 1;
+    document.getElementById('score').textContent    = score;
+    document.getElementById('progressFill').style.width = `${(current / total) * 100}%`;
+    document.getElementById('categoryBadge').textContent = word.category;
+    document.getElementById('question').textContent = word.english;
+    document.getElementById('feedback').textContent = '';
+    document.getElementById('feedback').className   = 'feedback';
+    document.getElementById('streak').textContent   = streak >= 3 ? `🔥 ${streak} streak!` : '';
+    document.getElementById('nextBtn').style.display = 'none';
+
+    const optionsEl = document.getElementById('options');
+    optionsEl.innerHTML = '';
+    options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'option';
+      btn.textContent = opt.german;
+      btn.addEventListener('click', () => handleAnswer(opt, word, btn));
+      optionsEl.appendChild(btn);
+    });
+  }
+
+  function handleAnswer(chosen, correct, btn) {
+    if (answered) return;
+    answered = true;
+
+    const allBtns = document.querySelectorAll('.option');
+    allBtns.forEach(b => b.disabled = true);
+
+    const isCorrect = chosen.german === correct.german;
+    const feedback  = document.getElementById('feedback');
+
+    if (isCorrect) {
+      btn.classList.add('correct');
+      score++; streak++;
+      feedback.textContent = getPositiveFeedback(streak);
+      feedback.className   = 'feedback correct-msg';
+    } else {
+      btn.classList.add('wrong');
+      streak = 0;
+      allBtns.forEach(b => { if (b.textContent === correct.german) b.classList.add('reveal'); });
+      feedback.innerHTML = `✗ Correct: <strong>${correct.german}</strong>`;
+      feedback.className = 'feedback wrong-msg';
+    }
+
+    document.getElementById('streak').textContent  = streak >= 3 ? `🔥 ${streak} streak!` : '';
+    document.getElementById('score').textContent   = score;
+    document.getElementById('nextBtn').style.display = 'inline-block';
+  }
+
+  function getPositiveFeedback(n) {
+    if (n >= 10) return '🔥 Unstoppable!';
+    if (n >= 7)  return '⚡ On fire!';
+    if (n >= 5)  return '🎯 Excellent streak!';
+    if (n >= 3)  return '✓ Keep it going!';
+    return '✓ Correct!';
+  }
+
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    current++;
+    if (current >= questions.length) showScore();
+    else renderQuestion();
+  });
+
+  function showScore() {
+    document.getElementById('quizArea').classList.add('hidden');
+    document.getElementById('scoreScreen').classList.add('active');
+
+    const total = questions.length;
+    const pct   = Math.round((score / total) * 100);
+    document.getElementById('finalScore').textContent    = `${score} / ${total}`;
+    document.getElementById('scoreLabel').textContent    = `${pct}% correct`;
+
+    const modeLabel = activeIds.length === allCategories.length
+      ? 'All categories'
+      : allCategories.filter(c => activeIds.includes(c.id)).map(c => c.label).join(' + ');
+    document.getElementById('scoreModeLabel').textContent = modeLabel;
+
+    let grade, color;
+    if (pct >= 90)      { grade = 'Ausgezeichnet! 🏆';               color = '#4ade80'; }
+    else if (pct >= 75) { grade = 'Sehr gut! 👍';                    color = '#a78bfa'; }
+    else if (pct >= 60) { grade = 'Gut! Keep studying.';             color = '#f59e0b'; }
+    else if (pct >= 40) { grade = 'Nicht schlecht. Practice more.';  color = '#f97316'; }
+    else                { grade = "Sehr schwierig! Don't give up.";  color = '#f87171'; }
+
+    const gradeEl = document.getElementById('scoreGrade');
+    gradeEl.textContent  = grade;
+    gradeEl.style.color  = color;
+  }
+
+  boot();
+</script>
+</body>
+</html>
