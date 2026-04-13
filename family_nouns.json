@@ -36,5 +36,22 @@
   { "id": 35, "german": "kennenlernen", "english": "to get to know (a person)" },
   { "id": 36, "german": "treffen", "english": "to meet" },
   { "id": 37, "german": "anrufen", "english": "to call (phone)" },
-  { "id": 38, "german": "sterben", "english": "to die" }
+  { "id": 38, "german": "sterben", "english": "to die" },
+
+  { "id": 39, "german": "verstehen", "english": "to understand" },
+  { "id": 40, "german": "vergessen", "english": "to forget" },
+  { "id": 41, "german": "streiten", "english": "to fight / argue" },
+  { "id": 42, "german": "erinnern", "english": "to remember" },
+  { "id": 43, "german": "bezahlen", "english": "to pay" },
+  { "id": 44, "german": "zählen", "english": "to count" },
+  { "id": 45, "german": "zeigen", "english": "to show" },
+  { "id": 46, "german": "vorstellen", "english": "to introduce" },
+  { "id": 47, "german": "gratulieren", "english": "to congratulate" },
+  { "id": 48, "german": "bitten", "english": "to request / ask" },
+  { "id": 49, "german": "danken", "english": "to thank" },
+  { "id": 50, "german": "anfangen", "english": "to start / begin" },
+  { "id": 51, "german": "gestorben", "english": "dead (past participle of sterben)" },
+  { "id": 52, "german": "geboren", "english": "born" },
+  { "id": 53, "german": "weinen", "english": "to cry" },
+  { "id": 54, "german": "denken", "english": "to think" }
 ]
