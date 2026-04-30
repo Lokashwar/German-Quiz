@@ -8,5 +8,6 @@
   { "id": "Travel Nouns",     "label": "Travel Nouns",     "icon": "🏁", "file": "travel_verbs.json"  },
   { "id": "Travel Verbs",     "label": "Travel Verbs",     "icon": "⏰", "file": "travel.json"  },
   { "id": "House Verbs",     "label": "House Verbs",     "icon": "🏆", "file": "house_verbs.json"  },
-  { "id": "Household Nouns",     "label": "Household Nouns",     "icon": "🔺", "file": "household_nouns.json"  }
+  { "id": "Household Nouns",     "label": "Household Nouns",     "icon": "🔺", "file": "household_nouns.json"  },
+  { "id": "Verb Conjugations",  "label": "Verb Conjugations",   "icon": "🔀", "file": "verb_conjugations.json" }
 ]
